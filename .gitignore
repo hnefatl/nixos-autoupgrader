@@ -1,0 +1,3 @@
+/.direnv/
+# `nix build` output
+/result
