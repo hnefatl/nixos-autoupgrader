@@ -8,8 +8,8 @@ function die {
     exit 1
 }
 
-DEFINE_string upgrade_home_flake "" "Directory containing home-manager flake to update"
-DEFINE_string upgrade_os_flake "" "Directory containing home-manager flake to update"
+DEFINE_string os_flake_dir "" "Directory containing NixOS flake to update"
+DEFINE_string home_flake_dir "" "Directory containing home-manager flake to update"
 
 DEFINE_string update_inputs "" "Space-separated list of flake inputs to update. Defaults to all inputs."
 DEFINE_string from_email "" "Which address to send a result email from."
@@ -18,19 +18,19 @@ DEFINE_string to_email "" "Which address to send a result email to."
 FLAGS "$@" || exit $?
 eval set -- "${FLAGS_ARGV}"
 
-[[ -z "${FLAGS_upgrade_home_flake}"  ]] && [[ -z "${FLAGS_upgrade_os_flake}" ]] && die "One of --upgrade_home_flake or --upgrade_os_flake must be set"
+[[ -z "${FLAGS_home_flake_dir}"  ]] && [[ -z "${FLAGS_os_flake_dir}" ]] && die "One of --home_flake_dir or --os_flake_dir must be set"
 [[ -z "${FLAGS_from_email}" ]] && die "Missing flag --from_email"
 [[ -z "${FLAGS_to_email}" ]] && die "Missing flag --to_email"
 
 
 function main {
-    if [[ -n "${FLAGS_upgrade_home_flake}" ]] ; then
-        cd "${FLAGS_upgrade_home_flake}"
-        do_upgrade home "home-manager"
-    fi
-    if [[ -n "${FLAGS_upgrade_os_flake}" ]] ; then
-        cd "${FLAGS_upgrade_os_flake}"
+    if [[ -n "${FLAGS_os_flake_dir}" ]] ; then
+        cd "${FLAGS_os_flake_dir}"
         do_upgrade os "NixOS"
+    fi
+    if [[ -n "${FLAGS_home_flake_dir}" ]] ; then
+        cd "${FLAGS_home_flake_dir}"
+        do_upgrade home "home-manager"
     fi
 }
 
@@ -89,6 +89,8 @@ function send_result {
         echo "";
         aha -f "${output_file}"
     ) | sendmail -t
+    # Clean up the output, don't exit if it fails.
+    rm "${output_file}" || :
 }
 
 main
