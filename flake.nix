@@ -21,9 +21,13 @@
 
           runtimeInputs = with pkgs; [
             (callPackage ./shflags.nix { })
+            nh
             nix
             aha # ANSI colour codes to HTML markup
             system-sendmail
+            # Used by shflags
+            coreutils
+            gawk
           ];
         };
       };
