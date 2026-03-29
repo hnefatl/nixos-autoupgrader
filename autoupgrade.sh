@@ -10,6 +10,7 @@ function die {
 
 DEFINE_string os_flake_dir "" "Directory containing NixOS flake to update"
 DEFINE_string home_flake_dir "" "Directory containing home-manager flake to update"
+DEFINE_string home_user "" "Which user to run the home-manager upgrade as"
 
 DEFINE_string update_inputs "" "Space-separated list of flake inputs to update. Defaults to all inputs."
 DEFINE_string from_email "" "Which address to send a result email from."
@@ -19,6 +20,7 @@ FLAGS "$@" || exit $?
 eval set -- "${FLAGS_ARGV}"
 
 [[ -z "${FLAGS_home_flake_dir}"  ]] && [[ -z "${FLAGS_os_flake_dir}" ]] && die "One of --home_flake_dir or --os_flake_dir must be set"
+[[ -n "${FLAGS_home_flake_dir}"  ]] && [[ -z "${FLAGS_home_user}" ]] && die "--home_user must be set"
 [[ -z "${FLAGS_from_email}" ]] && die "Missing flag --from_email"
 [[ -z "${FLAGS_to_email}" ]] && die "Missing flag --to_email"
 
@@ -26,17 +28,20 @@ eval set -- "${FLAGS_ARGV}"
 function main {
     if [[ -n "${FLAGS_os_flake_dir}" ]] ; then
         cd "${FLAGS_os_flake_dir}"
-        do_upgrade os "NixOS"
+        BUILD_COMMAND=(nh os build --bypass-root-check .)
+        SWITCH_COMMAND=(nh os switch --bypass-root-check .)
+        do_upgrade "NixOS"
     fi
     if [[ -n "${FLAGS_home_flake_dir}" ]] ; then
         cd "${FLAGS_home_flake_dir}"
-        do_upgrade home "home-manager"
+        BUILD_COMMAND=(/run/wrappers/bin/sudo -u "${FLAGS_home_user}" nh home build .)
+        SWITCH_COMMAND=(/run/wrappers/bin/sudo -u "${FLAGS_home_user}" nh home switch .)
+        do_upgrade "home-manager"
     fi
 }
 
 function do_upgrade {
-    nh_subcommand="$1"
-    description="$2"
+    description="$1"
 
     log "Updating ${description} flake in $(pwd)..."
     echo "${FLAGS_update_inputs}" | xargs nix flake update 
@@ -45,18 +50,19 @@ function do_upgrade {
     output_file=$(mktemp)
     
     log "Building new ${description} generation (writing stdout to ${output_file})..."
-    nh "${nh_subcommand}" build . | tee "${output_file}"
+    "${BUILD_COMMAND[@]}" | tee "${output_file}"
 
     if ! system_diff "${output_file}" ; then
         log "No diff."
-        return
+    else
+        # Try to do the switch, don't exit if fails.
+        log "Switching to new ${description} generation..."
+        "${SWITCH_COMMAND[@]}" || :
+
+        send_result $? "${description}" "${output_file}"
     fi
-
-    # Try to do the switch, don't exit if fails.
-    log "Switching to new ${description} generation..."
-    nh "${nh_subcommand}" switch . || :
-
-    send_result $? "${description}" "${output_file}"
+    # Clean up the output, don't exit if it fails.
+    rm "${output_file}" || :
 }
 
 function log {
@@ -89,8 +95,6 @@ function send_result {
         echo "";
         aha -f "${output_file}"
     ) | sendmail -t
-    # Clean up the output, don't exit if it fails.
-    rm "${output_file}" || :
 }
 
 main

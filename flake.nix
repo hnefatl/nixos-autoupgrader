@@ -14,22 +14,7 @@
         packages = [ pkgs.bashInteractive ];
       };
       packages."${system}" = {
-        default = pkgs.writeShellApplication {
-          name = "autoupgrade";
-
-          text = pkgs.lib.readFile ./autoupgrade.sh;
-
-          runtimeInputs = with pkgs; [
-            (callPackage ./shflags.nix { })
-            nh
-            nix
-            aha # ANSI colour codes to HTML markup
-            system-sendmail
-            # Used by shflags
-            coreutils
-            gawk
-          ];
-        };
+        default = import ./autoupgrade.nix { inherit pkgs; };
       };
     };
 }
