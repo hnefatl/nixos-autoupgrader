@@ -16,5 +16,6 @@
       packages."${system}" = {
         default = import ./autoupgrade.nix { inherit pkgs; };
       };
+      nixosModules.nixos-autoupgrade = ./module.nix;
     };
 }
