@@ -80,9 +80,9 @@ function send_result {
     output_file="$3"
 
     if [[ "${status}" -eq 0 ]] ; then
-        subject="${upgrade_type} upgrade succeeded"
+        subject="$(hostname): ${upgrade_type} upgrade succeeded"
     else
-        subject="${upgrade_type} upgrade failed with code ${status}"
+        subject="$(hostname): ${upgrade_type} upgrade failed with code ${status}"
     fi
 
     log "Sending status email to ${FLAGS_to_email}..."
