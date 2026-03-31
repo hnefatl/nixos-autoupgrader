@@ -65,7 +65,7 @@ in
       timerConfig = {
         OnCalender = cfg.when;
       };
-      wantedBy = [ "multi-user.target" ];
+      wantedBy = [ "timers.target" ];
     };
     systemd.services.nixos-autoupgrade = {
       serviceConfig = {
