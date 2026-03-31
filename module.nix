@@ -63,8 +63,7 @@ in
   config = lib.mkIf cfg.enable {
     systemd.timers.nixos-autoupgrade = {
       timerConfig = {
-        OnCalender = cfg.when;
-        Unit = "nixos-autoupgrade.service";
+        OnCalendar = cfg.when;
       };
       wantedBy = [ "timers.target" ];
     };
