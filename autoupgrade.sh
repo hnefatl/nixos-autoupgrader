@@ -19,8 +19,8 @@ DEFINE_string to_email "" "Which address to send a result email to."
 FLAGS "$@" || exit $?
 eval set -- "${FLAGS_ARGV}"
 
-[[ -z "${FLAGS_home_flake_dir}"  ]] && [[ -z "${FLAGS_os_flake_dir}" ]] && die "One of --home_flake_dir or --os_flake_dir must be set"
-[[ -n "${FLAGS_home_flake_dir}"  ]] && [[ -z "${FLAGS_home_user}" ]] && die "--home_user must be set"
+[[ -z "${FLAGS_home_flake_dir}" ]] && [[ -z "${FLAGS_os_flake_dir}" ]] && die "One of --home_flake_dir or --os_flake_dir must be set"
+[[ -n "${FLAGS_home_flake_dir}" ]] && [[ -z "${FLAGS_home_user}" ]] && die "--home_user must be set"
 [[ -z "${FLAGS_from_email}" ]] && die "Missing flag --from_email"
 [[ -z "${FLAGS_to_email}" ]] && die "Missing flag --to_email"
 
@@ -44,7 +44,7 @@ function do_upgrade {
     description="$1"
 
     log "Updating ${description} flake inputs '${FLAGS_update_inputs}' in $(pwd)..."
-    echo "${FLAGS_update_inputs}" | xargs nix flake update 
+    echo "${FLAGS_update_inputs}" | xargs nix flake update
 
     log "Upgrading ${description}..."
     output_file=$(mktemp)
