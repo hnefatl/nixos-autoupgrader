@@ -43,7 +43,7 @@ function main {
 function do_upgrade {
     description="$1"
 
-    log "Updating ${description} flake in $(pwd)..."
+    log "Updating ${description} flake inputs '${FLAGS_update_inputs}' in $(pwd)..."
     echo "${FLAGS_update_inputs}" | xargs nix flake update 
 
     log "Upgrading ${description}..."
