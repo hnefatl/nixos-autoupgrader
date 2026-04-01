@@ -93,7 +93,7 @@ function send_result {
         echo "Content-Type: text/html";
         echo "MIME-Version: 1.0";
         echo "";
-        aha -f "${output_file}"
+        grep -vE "(<<<)|(>>>)" "${output_file}" | aha
     ) | sendmail -t
 }
 
