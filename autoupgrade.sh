@@ -11,6 +11,7 @@ function die {
 DEFINE_string os_flake_dir "" "Directory containing NixOS flake to update"
 DEFINE_string home_flake_dir "" "Directory containing home-manager flake to update"
 DEFINE_string home_user "" "Which user to run the home-manager upgrade as"
+DEFINE_string cleanup_output_files "true" "Whether to delete output files when no longer needed"
 
 DEFINE_string update_inputs "" "Space-separated list of flake inputs to update. Defaults to all inputs."
 DEFINE_string from_email "" "Which address to send a result email from."
@@ -23,7 +24,6 @@ eval set -- "${FLAGS_ARGV}"
 [[ -n "${FLAGS_home_flake_dir}" ]] && [[ -z "${FLAGS_home_user}" ]] && die "--home_user must be set"
 [[ -z "${FLAGS_from_email}" ]] && die "Missing flag --from_email"
 [[ -z "${FLAGS_to_email}" ]] && die "Missing flag --to_email"
-
 
 function main {
     if [[ -n "${FLAGS_os_flake_dir}" ]] ; then
@@ -44,7 +44,7 @@ function do_upgrade {
     description="$1"
 
     log "Updating ${description} flake inputs '${FLAGS_update_inputs}' in $(pwd)..."
-    echo "${FLAGS_update_inputs}" | xargs nix flake update
+    echo "${FLAGS_update_inputs}" | /run/wrappers/bin/sudo -u keith xargs nix flake update
 
     log "Upgrading ${description}..."
     output_file=$(mktemp)
@@ -61,8 +61,10 @@ function do_upgrade {
 
         send_result $? "${description}" "${output_file}"
     fi
-    # Clean up the output, don't exit if it fails.
-    rm "${output_file}" || :
+    if [[ "${FLAGS_cleanup_output_files}" == "true" ]] ; then
+        # Clean up the output, don't exit if it fails.
+        rm "${output_file}" || :
+    fi
 }
 
 function log {
