@@ -64,6 +64,7 @@ in
     systemd.timers.nixos-autoupgrade = {
       timerConfig = {
         OnCalendar = cfg.when;
+        Persistent = true;
       };
       wantedBy = [ "timers.target" ];
     };
