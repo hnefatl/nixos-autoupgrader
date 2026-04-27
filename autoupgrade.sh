@@ -28,14 +28,14 @@ eval set -- "${FLAGS_ARGV}"
 function main {
     if [[ -n "${FLAGS_os_flake_dir}" ]] ; then
         cd "${FLAGS_os_flake_dir}"
-        BUILD_COMMAND=(nh os build --bypass-root-check .)
-        SWITCH_COMMAND=(nh os switch --bypass-root-check .)
+        BUILD_COMMAND=(nh os build --no-nom --bypass-root-check .)
+        SWITCH_COMMAND=(nh os switch --no-nom --bypass-root-check .)
         do_upgrade "NixOS"
     fi
     if [[ -n "${FLAGS_home_flake_dir}" ]] ; then
         cd "${FLAGS_home_flake_dir}"
-        BUILD_COMMAND=(/run/wrappers/bin/sudo -u "${FLAGS_home_user}" nh home build .)
-        SWITCH_COMMAND=(/run/wrappers/bin/sudo -u "${FLAGS_home_user}" nh home switch .)
+        BUILD_COMMAND=(/run/wrappers/bin/sudo -u "${FLAGS_home_user}" nh home build --no-nom .)
+        SWITCH_COMMAND=(/run/wrappers/bin/sudo -u "${FLAGS_home_user}" nh home switch --no-nom .)
         do_upgrade "home-manager"
     fi
 }
