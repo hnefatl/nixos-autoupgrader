@@ -69,6 +69,8 @@ in
       wantedBy = [ "timers.target" ];
     };
     systemd.services.nixos-autoupgrade = {
+      wants = ["network-online.target"];
+      requires = ["network-online.target"];
       serviceConfig = {
         ExecStart = lib.strings.join " " [
           "${autoupgrade}/bin/autoupgrade"
