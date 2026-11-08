@@ -63,6 +63,7 @@ in
   config = lib.mkIf cfg.enable {
     services.cron.systemCronJobs = [
       (lib.strings.join " " [
+        cfg.when
         "${autoupgrade}/bin/autoupgrade"
         "--os_flake_dir=${cfg.args.os-flake-dir}"
         "--home_flake_dir=${cfg.args.home-flake-dir}"
